@@ -293,6 +293,17 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo)
 }
 #endif
 
+/************************************************************************************
+* Service Name: Spi_GetStatus
+* Service ID[hex]: 0x06
+* Sync/Async: Synchronous
+* Reentrancy: Reentrant
+* Parameters (in): None
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: Spi_StatusType
+* Description: Service returns the SPI Handler/Driver software module status.
+************************************************************************************/
 #if(SPI_HW_STATUS_API == STD_ON)
 Spi_StatusType* Spi_GetStatus(void)
 {
