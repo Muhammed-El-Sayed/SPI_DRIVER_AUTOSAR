@@ -167,14 +167,8 @@
    Spi_Frame_FormatType   Spi_Frame_Format;
    Spi_Clock_PhaseType    Spi_Clock_Phase;
    Spi_Clock_PolarityType Spi_Clock_Polarity;
-   }Spi_ConfigChannel;
-   
-   /* Data Structure required for initializing the SPI Driver */
-   typedef struct Spi_ConfigType
-   {
-	Spi_ConfigChannel SpiPins[SPI_PINS_CONFIGURED_NUMBER];
    } Spi_ConfigType;
-
+   
 
 /*******************************************************************************
  *                      Function Prototypes                                    *
@@ -208,6 +202,6 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo);
  *******************************************************************************/
 
 /* Extern PB structures to be used by SPI and other modules */
-extern const Spi_ConfigType Spi_Configuration;
+extern const  Spi_ConfigType Spi_Configuration;
 
 #endif /* SPI_H */

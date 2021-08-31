@@ -13,8 +13,8 @@
 #include "SSI_Regs.h"  
 #include "tm4c123gh6pm_registers.h"
 
-STATIC uint8 Spi_Status =   SPI_NOT_INITIALIZED;
-STATIC const Spi_ConfigChannel * Spi_ChannelPtr = NULL_PTR;
+STATIC const Spi_ConfigType * SPI_Configuration_Ptr = NULL_PTR;
+STATIC uint8 Spi_Init_Status =   SPI_NOT_INITIALIZED;
 
 #if (SPI_DEV_ERROR_DETECT == STD_ON)
 
@@ -42,8 +42,7 @@ STATIC const Spi_ConfigChannel * Spi_ChannelPtr = NULL_PTR;
 void Spi_Init(const Spi_ConfigType* ConfigPtr)
 {  
   volatile uint32 * SPIn_BaseAddress_Ptr = NULL_PTR;
-  volatile uint8 Spi_Pin_Index_Iterator =0;
-    
+  
 #if (SPI_DEV_ERROR_DETECT == STD_ON)
 	/* check if the input configuration pointer is not a NULL_PTR */
 	if (NULL_PTR == ConfigPtr)
@@ -51,7 +50,7 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
 		Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_Init_SID,
 		     SPI_E_PARAM_POINTER_ID);
 	}
-        if(Spi_Status == SPI_INITIALIZED )
+        if(Spi_Init_Status == SPI_INITIALIZED )
         {
           Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_Init_SID,
 		     SPI_E_ALREADY_INITIALIZED_ID);
@@ -60,14 +59,10 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
 #endif
 	{
 		
-		Spi_Status       = SPI_INITIALIZED;
-                Spi_ChannelPtr    = ConfigPtr->SpiPins; /* address of the first SpiPins structure --> SpiPins[0] */
-                
-               
-                while( Spi_Pin_Index_Iterator != SPI_PINS_CONFIGURED_NUMBER )
-                {
-                  
-                 switch( Spi_ChannelPtr->SpiChannelID )
+                SPI_Configuration_Ptr = ConfigPtr;
+		Spi_Init_Status       = SPI_INITIALIZED;
+             
+                 switch( SPI_Configuration_Ptr->SpiChannelID )
                  {
                  case 0x00 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI0_BASE_ADDRESS; /* SPI0 Base Address */
                    break;
@@ -86,7 +81,7 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
     
 
                  /*Enable SSIn module clock*/
-                 SET_BIT(*(volatile uint32 *)((volatile uint8 *)RCGCSSI_BASE_ADDRESS + RCGCSSI_OFFSET) , ((Spi_ChannelPtr->SpiChannelID) & 0x0F));
+                 SET_BIT(*(volatile uint32 *)((volatile uint8 *)RCGCSSI_BASE_ADDRESS + RCGCSSI_OFFSET) , ((SPI_Configuration_Ptr->SpiChannelID) & 0x0F));
                  
                  
                  /*Disable SSI operation*/
@@ -94,11 +89,11 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
                  
             
                  /*Select Mode*/
-                 if(Spi_ChannelPtr->Spi_Mode == Master_Mode)
+                 if(SPI_Configuration_Ptr->Spi_Mode == Master_Mode)
                  {
                    CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR1_OFFSET) , 2 );
                  }
-                 else if(Spi_ChannelPtr->Spi_Mode == Slave_Mode)
+                 else if(SPI_Configuration_Ptr->Spi_Mode == Slave_Mode)
                  {
                    SET_BIT(*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR1_OFFSET) , 2 );
                  }
@@ -108,32 +103,32 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
                  }
                  
                  /*SSI Clock Source*/
-                 *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICC_OFFSET) = Spi_ChannelPtr->Spi_Source_Clock;
+                 *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICC_OFFSET) = SPI_Configuration_Ptr->Spi_Source_Clock;
                  
                  
                  /*Clock Prescaler*/
                   /*Initial value of SCR , Frame Style , SPO , SPH , Data_Size =0*/
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) = 0;
                  
-                 if( (uint32)((SPI_System_Clock_Source)/(Spi_ChannelPtr->BaudRate)) > 254 )
+                 if( (uint32)((SPI_System_Clock_Source)/(SPI_Configuration_Ptr->BaudRate)) > 254 )
                  {
                    *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICPSR_OFFSET) = 254;
                
-                   *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= ( (uint32)((((SPI_System_Clock_Source)/(Spi_ChannelPtr->BaudRate)) / 254) -1 ) << 8 );
+                   *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= ( (uint32)((((SPI_System_Clock_Source)/(SPI_Configuration_Ptr->BaudRate)) / 254) -1 ) << 8 );
                  }
                  else 
                  {
-                   *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICPSR_OFFSET) = (uint32)((SPI_System_Clock_Source)/(Spi_ChannelPtr->BaudRate));
+                   *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICPSR_OFFSET) = (uint32)((SPI_System_Clock_Source)/(SPI_Configuration_Ptr->BaudRate));
                  }
                  
                  /*Frame Format*/
-                 switch(Spi_ChannelPtr->Spi_Frame_Format)
+                 switch(SPI_Configuration_Ptr->Spi_Frame_Format)
                  {
                  case Freescale_SPI:
                     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) , 4 );
                     CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) , 5 );
-                    *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= (Spi_ChannelPtr->Spi_Clock_Polarity)<<6;
-                    *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= (Spi_ChannelPtr->Spi_Clock_Phase)<<7;
+                    *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= (SPI_Configuration_Ptr->Spi_Clock_Polarity)<<6;
+                    *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= (SPI_Configuration_Ptr->Spi_Clock_Phase)<<7;
                     
                    break;
                  case TI_Sync_Serial:
@@ -151,7 +146,7 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
                  /*Data Size*/
                  #if (SPI_DEV_ERROR_DETECT == STD_ON)
                          
-                 if( (Spi_ChannelPtr->SpiDataWidth)<(0x3) || (Spi_ChannelPtr->SpiDataWidth)>(0xF))
+                 if( (SPI_Configuration_Ptr->SpiDataWidth)<(0x3) || (SPI_Configuration_Ptr->SpiDataWidth)>(0xF))
                  {
                        Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_Init_SID,
 		          SPI_E_PARAM_LENGTH_ID);
@@ -159,17 +154,11 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
                  else 
                  #endif
                  {    
-                   *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= (Spi_ChannelPtr->SpiDataWidth);
+                   *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) |= (SPI_Configuration_Ptr->SpiDataWidth);
                  }
                  /*Enable SSI Operation*/
                  CLEAR_BIT(*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR1_OFFSET) , 1 );
-                 
-     ++Spi_Pin_Index_Iterator;
-     ++Spi_ChannelPtr;
-     }
-     
-     Spi_ChannelPtr       = ConfigPtr->SpiPins; /* address of the first SpiPins structure --> SpiPins[0] */
-     
+  
    }
 }
 
@@ -186,11 +175,11 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
 * Return value: Std_ReturnType
 * Description: Function to deinitialize the SSI module.
 ************************************************************************************/
-Std_ReturnType* Spi_DeInit(void)
+Std_ReturnType Spi_DeInit(void)
 {
   #if (SPI_DEV_ERROR_DETECT == STD_ON)
 
-        if(Spi_Status == SPI_NOT_INITIALIZED )
+        if(Spi_Init_Status == SPI_NOT_INITIALIZED )
         {
           
           Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_DeInit_SID,
@@ -200,13 +189,10 @@ Std_ReturnType* Spi_DeInit(void)
 #endif
         {
           volatile uint32 * SPIn_BaseAddress_Ptr = NULL_PTR;
-          volatile uint8 Spi_Pin_Index_Iterator =0;
-          volatile Std_ReturnType Spi_DeInit_Success_Status[SPI_PINS_CONFIGURED_NUMBER];
-        while( Spi_Pin_Index_Iterator != SPI_PINS_CONFIGURED_NUMBER )
-        {
-          if( Spi_ChannelPtr ->Spi_Status != SPI_BUSY)
+
+          if( SPI_Configuration_Ptr ->Spi_Status != SPI_BUSY)
           {
-            switch( Spi_ChannelPtr->SpiChannelID )
+            switch( SPI_Configuration_Ptr->SpiChannelID )
                  {
                  case 0x00 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI0_BASE_ADDRESS; /* SPI0 Base Address */
                    break;
@@ -222,25 +208,17 @@ Std_ReturnType* Spi_DeInit(void)
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICC_OFFSET)=0;
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) = 0;
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICPSR_OFFSET)=0;
-                 Spi_DeInit_Success_Status[Spi_Pin_Index_Iterator]= E_OK;
-                 Spi_ChannelPtr->Spi_Status = SPI_UNINIT;
+                 SPI_Configuration_Ptr->Spi_Status = SPI_UNINIT;                 
+                 Spi_Init_Status =   SPI_NOT_INITIALIZED;
+                 
+                 return E_OK;       
           }
          
           else
           {
-            Spi_DeInit_Success_Status[Spi_Pin_Index_Iterator]= E_NOT_OK;  
+            return E_NOT_OK;  
           }
-       
-          ++Spi_Pin_Index_Iterator;
-          ++Spi_ChannelPtr;
-        }
-        
-        return &Spi_DeInit_Success_Status; 
-         /*
-           Bug: If Deinit Fnc is called after Init then Calling any fnc. the unint error will not be fired
-                It is difficult to handle now because if SPI0 is deinit well but SPI1 isnot so why shall I make the SPI_Status to be Uninitalized 
-         */
-         
+      
 
         }
 
@@ -270,7 +248,7 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo)
 		Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_GetVersionInfo_SID,
 		     SPI_E_PARAM_POINTER_ID);
 	}
-        if(Spi_Status == SPI_NOT_INITIALIZED )
+        if(Spi_Init_Status == SPI_NOT_INITIALIZED )
         {
           
           Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_GetVersionInfo_SID,
@@ -304,12 +282,13 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo)
 * Return value: Spi_StatusType
 * Description: Service returns the SPI Handler/Driver software module status.
 ************************************************************************************/
+
 #if(SPI_HW_STATUS_API == STD_ON)
-Spi_StatusType* Spi_GetStatus(void)
+Spi_StatusType Spi_GetStatus(void)
 {
   #if (SPI_DEV_ERROR_DETECT == STD_ON)
 
-        if(Spi_Status == SPI_NOT_INITIALIZED )
+        if(Spi_Init_Status == SPI_NOT_INITIALIZED )
         {
           
           Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_GetStatus_SID,
@@ -318,18 +297,129 @@ Spi_StatusType* Spi_GetStatus(void)
 	else
 #endif /* (SPI_DEV_ERROR_DETECT == STD_ON) */
 {  
-   volatile uint8 Spi_Pin_Index_Iterator =0;
-   volatile Spi_StatusType Spis_Status[SPI_PINS_CONFIGURED_NUMBER];
-   while( Spi_Pin_Index_Iterator != SPI_PINS_CONFIGURED_NUMBER )
-   {
-   
-      Spis_Status[Spi_Pin_Index_Iterator]=Spi_ChannelPtr->Spi_Status;
+
+      return SPI_Configuration_Ptr->Spi_Status ;
      
-     ++Spi_Pin_Index_Iterator;
-     ++Spi_ChannelPtr;
-   }
-  return &Spis_Status;
 }
 }
 #endif
+
+/************************************************************************************
+* Service Name: Spi_WriteIB
+* Service ID[hex]: 0x02
+* Sync/Async: Synchronous
+* Reentrancy: Reentrant
+* Parameters (in): DataBufferPtr - Pointer to source data buffer
+* Parameters (inout): None
+* Parameters (out): None
+* Return value: Std_ReturnType
+* Description: Service for writing one or more data to an IB SPI Handler/Driver Channel specified
+by parameter.
+************************************************************************************/
+
+#if(SPI_CHANNEL_BUFFERS_ALLOWED_API == STD_ON)
+Std_ReturnType Spi_WriteIB(Spi_ChannelType Channel,const Spi_DataBufferType* DataBufferPtr)
+{
+  
+#if (SPI_DEV_ERROR_DETECT == STD_ON)
+
+        if(Spi_Init_Status == SPI_NOT_INITIALIZED )
+        {
+          
+          Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_WriteIB_SID,
+		     SPI_E_UNINIT_ID);
+        }
+        
+        if (NULL_PTR == DataBufferPtr)
+	{
+		Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_WriteIB_SID,
+		     SPI_E_PARAM_POINTER_ID);
+	}
+        
+        if( (Channel != 0x00) || (Channel != 0x01) || (Channel != 0x02) || (Channel != 0x03) )
+        {
+                Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_WriteIB_SID,
+		      SPI_E_PARAM_CHANNEL_ID);
+        }
+        
+	else
+#endif /* (SPI_DEV_ERROR_DETECT == STD_ON) */
+        {
+            volatile uint32 * SPIn_BaseAddress_Ptr = NULL_PTR;
+
+            switch( Channel )
+                 {
+                 case 0x00 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI0_BASE_ADDRESS; /* SPI0 Base Address */
+                   break;
+                 case 0x01 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI1_BASE_ADDRESS; /* SPI1 Base Address */
+                   break;
+                 case 0x02 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI2_BASE_ADDRESS; /* SPI2 Base Address */
+                   break;
+                 case 0x03 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI3_BASE_ADDRESS; /* SPI3 Base Address */
+                   break;
+                 }
+            
+          /*Write Data*/  
+           *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSIDATA_OFFSET) = *DataBufferPtr;
+          /*Busy wait as soon as Transmit FIFO is not empty*/
+           while( ((*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSISR_OFFSET)) & (1<<0)) == 0 ); 
+            
+           return E_OK;  
+        }
+         
+}
+#endif
+
+
+#if(SPI_CHANNEL_BUFFERS_ALLOWED_API == STD_ON)
+Std_ReturnType Spi_ReadIB(Spi_ChannelType Channel,Spi_DataBufferType* DataBufferPointer)
+{
+  
+#if (SPI_DEV_ERROR_DETECT == STD_ON)
+
+        if(Spi_Init_Status == SPI_NOT_INITIALIZED )
+        {
+          
+          Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_ReadIB_SID,
+		     SPI_E_UNINIT_ID);
+        }
+                
+        if( (Channel != 0x00) || (Channel != 0x01) || (Channel != 0x02) || (Channel != 0x03) )
+        {
+                Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_ReadIB_SID,
+		      SPI_E_PARAM_CHANNEL_ID);
+        }
+        
+	else
+#endif /* (SPI_DEV_ERROR_DETECT == STD_ON) */
+        {
+            volatile uint32 * SPIn_BaseAddress_Ptr = NULL_PTR;
+
+            switch( Channel )
+                 {
+                 case 0x00 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI0_BASE_ADDRESS; /* SPI0 Base Address */
+                   break;
+                 case 0x01 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI1_BASE_ADDRESS; /* SPI1 Base Address */
+                   break;
+                 case 0x02 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI2_BASE_ADDRESS; /* SPI2 Base Address */
+                   break;
+                 case 0x03 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI3_BASE_ADDRESS; /* SPI3 Base Address */
+                   break;
+                 }
+           
+            /*Busy wait as soon as Receive FIFO is not full*/
+            while( ((*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSISR_OFFSET)) & (1<<3)) == 0 ); 
+           /*Read Data*/  
+           *DataBufferPtr = *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSIDATA_OFFSET);
+           
+           return E_OK;  
+        }
+         
+}
+#endif
+
+
+
+
+
 

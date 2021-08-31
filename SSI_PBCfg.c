@@ -41,9 +41,9 @@
    
    
 /* PB structure used with SSI_Init API */
-const Spi_ConfigType Spi_Configuration = {  SPI_0,InternalBuffer,DATA_LENGTH_8_BITS,MSB,Default_Baud_Rate,SPI_UNINIT,Master_Mode,System_Clock,Freescale_SPI,Second_Clock_Edge,Steady_State_LOW,
-                                            SPI_1,InternalBuffer,DATA_LENGTH_8_BITS,MSB,Default_Baud_Rate,SPI_UNINIT,Slave_Mode,System_Clock,Freescale_SPI,Second_Clock_Edge,Steady_State_LOW,
-                                            SPI_2,InternalBuffer,DATA_LENGTH_16_BITS,MSB,Default_Baud_Rate,SPI_UNINIT,Master_Mode,System_Clock,Freescale_SPI,Second_Clock_Edge,Steady_State_LOW,
-                                            SPI_3,InternalBuffer,DATA_LENGTH_16_BITS,MSB,Default_Baud_Rate,SPI_UNINIT,Slave_Mode,System_Clock,Freescale_SPI,Second_Clock_Edge,Steady_State_LOW
+const  Spi_ConfigType Spi_Configuration = { 
+  
+  SPI_0,InternalBuffer,DATA_LENGTH_8_BITS,MSB,Default_Baud_Rate,SPI_UNINIT,Master_Mode,System_Clock,Freescale_SPI,Second_Clock_Edge,Steady_State_LOW };
+                                            
                  
-				         };
+				        

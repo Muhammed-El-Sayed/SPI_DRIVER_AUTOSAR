@@ -35,6 +35,8 @@
 /* Pre-compile option for Get SPI Status API */
 #define SPI_HW_STATUS_API                   (STD_ON)
 
+/* Pre-compile option for Get SPI WriteIB API */ 
+#define  SPI_CHANNEL_BUFFERS_ALLOWED_API    (STD_ON)   
    
 /* Number of the configured Spi Channels */
 #define SPI_PINS_CONFIGURED_NUMBER              (4U)
