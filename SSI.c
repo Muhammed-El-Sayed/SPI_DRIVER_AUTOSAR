@@ -371,6 +371,18 @@ Std_ReturnType Spi_WriteIB(Spi_ChannelType Channel,const Spi_DataBufferType* Dat
 #endif
 
 
+/************************************************************************************
+* Service Name: Spi_ReadIB
+* Service ID[hex]: 0x04
+* Sync/Async: Synchronous
+* Reentrancy: Reentrant
+* Parameters (in): Channel 
+* Parameters (inout): None
+* Parameters (out): DataBufferPointer
+* Return value: Std_ReturnType
+* Description: Service for reading synchronously one or more data from an IB SPI Handler/Driver
+Channel specified by parameter.
+************************************************************************************/
 #if(SPI_CHANNEL_BUFFERS_ALLOWED_API == STD_ON)
 Std_ReturnType Spi_ReadIB(Spi_ChannelType Channel,Spi_DataBufferType* DataBufferPointer)
 {
