@@ -26,24 +26,22 @@
 #define SSI_PBCFG_AR_RELEASE_PATCH_VERSION     (3U)
 
 /* AUTOSAR Version checking between SSI_PBcfg.c and SSI.h files */
-#if ((SSI_PBCFG_AR_RELEASE_MAJOR_VERSION != SSI_AR_RELEASE_MAJOR_VERSION)\
- ||  (SSI_PBCFG_AR_RELEASE_MINOR_VERSION != SSI_AR_RELEASE_MINOR_VERSION)\
- ||  (SSI_PBCFG_AR_RELEASE_PATCH_VERSION != SSI_AR_RELEASE_PATCH_VERSION))
+#if ((SSI_PBCFG_AR_RELEASE_MAJOR_VERSION != SPI_AR_RELEASE_MAJOR_VERSION)\
+ ||  (SSI_PBCFG_AR_RELEASE_MINOR_VERSION != SPI_AR_RELEASE_MINOR_VERSION)\
+ ||  (SSI_PBCFG_AR_RELEASE_PATCH_VERSION != SPI_AR_RELEASE_PATCH_VERSION))
   #error "The AR version of PBcfg.c does not match the expected version"
 #endif
 
 /* Software Version checking between SSI_PBcfg.c and SSI.h files */
-#if ((SSI_PBCFG_SW_MAJOR_VERSION != SSI_SW_MAJOR_VERSION)\
- ||  (SSI_PBCFG_SW_MINOR_VERSION != SSI_SW_MINOR_VERSION)\
- ||  (SSI_PBCFG_SW_PATCH_VERSION != SSI_SW_PATCH_VERSION))
+#if ((SSI_PBCFG_SW_MAJOR_VERSION != SPI_SW_MAJOR_VERSION)\
+ ||  (SSI_PBCFG_SW_MINOR_VERSION != SPI_SW_MINOR_VERSION)\
+ ||  (SSI_PBCFG_SW_PATCH_VERSION != SPI_SW_PATCH_VERSION))
   #error "The SW version of PBcfg.c does not match the expected version"
 #endif
    
    
 /* PB structure used with SSI_Init API */
-const  Spi_ConfigType Spi_Configuration = { 
-  
-  SPI_0,InternalBuffer,DATA_LENGTH_8_BITS,MSB,Default_Baud_Rate,SPI_UNINIT,Master_Mode,System_Clock,Freescale_SPI,Second_Clock_Edge,Steady_State_LOW };
-                                            
-                 
-				        
+const Spi_ConfigType Spi_Configuration = { 
+ 					    SPI_CHANNEL_0,SPI_CHANNEL_0_BufferType, SPI_CHANNEL_0_DATA_LENGTH, SPI_CHANNEL_0_START_BIT, SPI_CHANNEL_0_Baud_Rate, SPI_CHANNEL_0_STATUS, SPI_CHANNEL_0_MODE, SPI_CHANNEL_0_CLOCK_SOURCE, SPI_CHANNEL_0_FRAME_FORMAT, SPI_CHANNEL_0_CLOCK_PHASE, SPI_CHNNEL_0_CLOCK_POLARITY,
+                                            SPI_CHANNEL_1,SPI_CHANNEL_1_BufferType, SPI_CHANNEL_1_DATA_LENGTH, SPI_CHANNEL_1_START_BIT, SPI_CHANNEL_1_Baud_Rate, SPI_CHANNEL_1_STATUS, SPI_CHANNEL_1_MODE, SPI_CHANNEL_1_CLOCK_SOURCE, SPI_CHANNEL_1_FRAME_FORMAT, SPI_CHANNEL_1_CLOCK_PHASE, SPI_CHNNEL_1_CLOCK_POLARITY
+				         };

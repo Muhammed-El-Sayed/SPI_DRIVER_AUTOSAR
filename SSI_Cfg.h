@@ -35,43 +35,58 @@
 /* Pre-compile option for Get SPI Status API */
 #define SPI_HW_STATUS_API                   (STD_ON)
 
-/* Pre-compile option for Get SPI WriteIB API */ 
-#define  SPI_CHANNEL_BUFFERS_ALLOWED_API    (STD_ON)   
-   
 /* Number of the configured Spi Channels */
-#define SPI_PINS_CONFIGURED_NUMBER              (4U)
+#define SPI_MAX_CHANNEL 			(2U)
 
+/* SPI CHANNEL generated configuration  */
 /* Channel Index in the array of structures in SSI_PBcfg.c */
-#define SpiConf_0_CHANNEL_ID_INDEX          (uint8)0x00
-#define SpiConf_1_CHANNEL_ID_INDEX          (uint8)0x01
-#define SpiConf_2_CHANNEL_ID_INDEX          (uint8)0x02
-#define SpiConf_3_CHANNEL_ID_INDEX          (uint8)0x03   
+#define SPI_CHANNEL_0_INDEX      	   (uint8)0x00
+#define SPI_CHANNEL_1_INDEX                (uint8)0x01
 
- /*SPI ID*/  
-#define SPI_0   (uint8)0x00
-#define SPI_1   (uint8)0x01
-#define SPI_2   (uint8)0x02
-#define SPI_3   (uint8)0x03   
-      
-/*SPI Data Width*/
-#define DATA_LENGTH_4_BITS    (0x3)
-#define DATA_LENGTH_5_BITS    (0x4)
-#define DATA_LENGTH_6_BITS    (0x5)
-#define DATA_LENGTH_7_BITS    (0x6)
-#define DATA_LENGTH_8_BITS    (0x7)
-#define DATA_LENGTH_9_BITS    (0x8)
-#define DATA_LENGTH_10_BITS   (0x9)
-#define DATA_LENGTH_11_BITS   (0xA)
-#define DATA_LENGTH_12_BITS   (0xB)
-#define DATA_LENGTH_13_BITS   (0xC)
-#define DATA_LENGTH_14_BITS   (0xD)
-#define DATA_LENGTH_15_BITS   (0xE)
-#define DATA_LENGTH_16_BITS   (0xF)
+#define SPI_CHANNEL_0       		   (uint8)0x00
+#define SPI_CHANNEL_1       		   (uint8)0x01
+ 
+  /* Data width */
+#define SPI_CHANNEL_0_DATA_LENGTH	    (DATA_LENGTH_8_BITS)
+#define SPI_CHANNEL_1_DATA_LENGTH	    (DATA_LENGTH_8_BITS)
    
-/*SPI Baud Rate*/   
-#define Default_Baud_Rate             (9600.0)
+   /* SpiBufferType */
+#define SPI_CHANNEL_0_BufferType            (InternalBuffer)
+#define SPI_CHANNEL_1_BufferType      	    (InternalBuffer)
+   
+   /* SPI channel start bit  */
+#define SPI_CHANNEL_0_START_BIT 	    (MSB)
+#define SPI_CHANNEL_1_START_BIT 	    (MSB)
+   
+   /* SPI Channel status */
+#define SPI_CHANNEL_0_STATUS                (SPI_UNINIT)
+#define SPI_CHANNEL_1_STATUS		    (SPI_UNINIT)
+   
+   /* SPI Channel Mode */
+#define SPI_CHANNEL_0_MODE		    (Master_Mode)
+#define SPI_CHANNEL_1_MODE   	            (Slave_Mode)
+   
+   /* SPI Channel source clock  */
+#define SPI_CHANNEL_0_CLOCK_SOURCE  	    (System_Clock)
+#define SPI_CHANNEL_1_CLOCK_SOURCE  	    (System_Clock) 
+   
+   /* SPI Channel Frame format  */
+#define SPI_CHANNEL_0_FRAME_FORMAT 	    (Freescale_SPI)
+#define SPI_CHANNEL_1_FRAME_FORMAT	    (Freescale_SPI)
+   
+   /* SPI CHANNEL Clock Phase*/
+#define SPI_CHANNEL_0_CLOCK_PHASE 	    (Second_Clock_Edge)
+#define SPI_CHANNEL_1_CLOCK_PHASE 	    (Second_Clock_Edge)
+   
+   /* SPI CHANNEL CLOCK POLARITY */
+#define SPI_CHNNEL_0_CLOCK_POLARITY	    (Steady_State_LOW)
+#define SPI_CHNNEL_1_CLOCK_POLARITY	    (Steady_State_LOW)
+   
+   /*SPI Baud Rate*/   
+#define SPI_CHANNEL_0_Baud_Rate             (9600.0)  
+#define SPI_CHANNEL_1_Baud_Rate             (9600.0)  
    
 /*SPI System Clock Source*/
-#define SPI_System_Clock_Source       (16000000.0)   
-
+#define SPI_System_Clock_Source       (16000000.0)  
+   
 #endif /* SPI_CFG_H */

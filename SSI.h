@@ -16,7 +16,7 @@
 #define SPI_VENDOR_ID    (1000U)
 
 /* SSI Module Id */
-#define SPI_MODULE_ID    (083U)
+#define SPI_MODULE_ID    (83U)
 
 /* Spi Instance Id */
 #define SPI_INSTANCE_ID  (0U)
@@ -111,10 +111,35 @@
 /*API SPI_Init service called while the SPI driver has already been initialized*/
 #define SPI_E_ALREADY_INITIALIZED_ID    (uint8)0x4A
 
-
+/*******************************************************************************
+ *			   Module configuration values 					       *
+ *******************************************************************************/
+      /*SPI Data Width in tiva c datasheet */
+#define DATA_LENGTH_4_BITS    (0x3)
+#define DATA_LENGTH_5_BITS    (0x4)
+#define DATA_LENGTH_6_BITS    (0x5)
+#define DATA_LENGTH_7_BITS    (0x6)
+#define DATA_LENGTH_8_BITS    (0x7)
+#define DATA_LENGTH_9_BITS    (0x8)
+#define DATA_LENGTH_10_BITS   (0x9)
+#define DATA_LENGTH_11_BITS   (0xA)
+#define DATA_LENGTH_12_BITS   (0xB)
+#define DATA_LENGTH_13_BITS   (0xC)
+#define DATA_LENGTH_14_BITS   (0xD)
+#define DATA_LENGTH_15_BITS   (0xE)
+#define DATA_LENGTH_16_BITS   (0xF)
+   
+  /* SPI Channel ID in tiva c datasheet  */
+#define SPI_0_CHANNEL_ID      (0x00) 
+#define SPI_1_CHANNEL_ID      (0x01)   
+#define SPI_2_CHANNEL_ID      (0x02) 
+#define SPI_3_CHANNEL_ID      (0x02) 
+   
+  
 /*******************************************************************************
  *                              Module Data Types                              *
- *******************************************************************************/
+ *******************************************************************************/   
+   
    typedef uint8  Spi_ChannelType;
    typedef uint8  Spi_DataBufferType;
    typedef uint8  Spi_DataWidthType;
@@ -167,8 +192,14 @@
    Spi_Frame_FormatType   Spi_Frame_Format;
    Spi_Clock_PhaseType    Spi_Clock_Phase;
    Spi_Clock_PolarityType Spi_Clock_Polarity;
-   } Spi_ConfigType;
+   }Spi_ConfigChannel;
    
+   /* Data Structure required for initializing the SPI Driver */
+   typedef struct Spi_ConfigType
+   {
+	Spi_ConfigChannel SpiPins[SPI_MAX_CHANNEL];
+   } Spi_ConfigType;
+
 
 /*******************************************************************************
  *                      Function Prototypes                                    *
@@ -202,6 +233,6 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo);
  *******************************************************************************/
 
 /* Extern PB structures to be used by SPI and other modules */
-extern const  Spi_ConfigType Spi_Configuration;
+extern const Spi_ConfigType Spi_Configuration;
 
 #endif /* SPI_H */
