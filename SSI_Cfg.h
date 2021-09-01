@@ -58,10 +58,6 @@
 #define SPI_CHANNEL_0_START_BIT 	    (MSB)
 #define SPI_CHANNEL_1_START_BIT 	    (MSB)
    
-   /* SPI Channel status */
-#define SPI_CHANNEL_0_STATUS                (SPI_UNINIT)
-#define SPI_CHANNEL_1_STATUS		    (SPI_UNINIT)
-   
    /* SPI Channel Mode */
 #define SPI_CHANNEL_0_MODE		    (Master_Mode)
 #define SPI_CHANNEL_1_MODE   	            (Slave_Mode)

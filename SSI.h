@@ -186,7 +186,6 @@
    Spi_DataWidthType      SpiDataWidth;
    SpiTransferStartType   SpiTransferStart;
    BaudRateType           BaudRate;
-   Spi_StatusType         Spi_Status;
    Spi_ModeType           Spi_Mode;  
    Spi_Source_ClockType   Spi_Source_Clock;
    Spi_Frame_FormatType   Spi_Frame_Format;
@@ -220,7 +219,7 @@ Std_ReturnType Spi_WriteIB(Spi_ChannelType Channel,const Spi_DataBufferType* Dat
                
 /* Service for Spi get status */
 #if(SPI_HW_STATUS_API == STD_ON)
-Spi_StatusType Spi_GetStatus(void);
+Spi_StatusType* Spi_GetStatus(void);
 #endif
               
 /* Function for SPI Get Version Info API */

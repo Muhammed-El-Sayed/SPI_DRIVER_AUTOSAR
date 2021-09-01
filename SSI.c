@@ -14,6 +14,7 @@
 #include "tm4c123gh6pm_registers.h"
 
 STATIC uint8 Spi_Init_Status =   SPI_NOT_INITIALIZED;
+STATIC Spi_StatusType Spi_Status [SPI_MAX_CHANNEL];
 STATIC const Spi_ConfigChannel * Spi_ChannelPtr = NULL_PTR;
 
 #if (SPI_DEV_ERROR_DETECT == STD_ON)
@@ -66,7 +67,7 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
 		
 		for( Spi_Pin_Index_Iterator = 0 ; Spi_Pin_Index_Iterator < SPI_MAX_CHANNEL ; Spi_Pin_Index_Iterator++)
 		{
-		   Spi_ChannelPtr->Spi_Status = SPI_IDLE;
+		   Spi_Status[Spi_Pin_Index_Iterator] = SPI_IDLE;
 		   switch( Spi_ChannelPtr->SpiChannelID )
 		   {
 		   case 0x00 :SPIn_BaseAddress_Ptr = (volatile uint32 *)SPI0_BASE_ADDRESS; /* SPI0 Base Address */
@@ -172,7 +173,7 @@ void Spi_Init(const Spi_ConfigType* ConfigPtr)
 	 Spi_ChannelPtr       = ConfigPtr->SpiPins; /* address of the first SpiPins structure --> SpiPins[0] */
      
    }
-}
+
 
 
 /************************************************************************************
@@ -194,7 +195,7 @@ Std_ReturnType Spi_DeInit(void)
         {
           //[SWS_Spi_00046]
           Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_DeInit_SID,
-		      SPI_E_UNINIT);
+		      SPI_E_UNINIT_ID);
         }
 	else 
 #endif
@@ -207,7 +208,7 @@ Std_ReturnType Spi_DeInit(void)
 	for( Spi_Pin_Index_Iterator = 0 ; Spi_Pin_Index_Iterator < SPI_MAX_CHANNEL ; Spi_Pin_Index_Iterator++)
 	{	
 		    
-          if(  Spi_ChannelPtr[Spi_Pin_Index_Iterator].Spi_Status != SPI_BUSY)
+          if(  Spi_Status[Spi_Pin_Index_Iterator] != SPI_BUSY)
           {
            	 switch( Spi_ChannelPtr[Spi_Pin_Index_Iterator].SpiChannelID )
                  {
@@ -226,18 +227,17 @@ Std_ReturnType Spi_DeInit(void)
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICC_OFFSET)= 0;
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICR0_OFFSET) =0;
                  *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSICPSR_OFFSET)=  0;
-                 Spi_ChannelPtr[Spi_Pin_Index_Iterator].Spi_Status = SPI_UNINIT;
+                 Spi_Status[Spi_Pin_Index_Iterator] = SPI_UNINIT;
           }
          
           else
           {
             return  E_NOT_OK;  
           }
+        }  
         }
         Spi_Init_Status       = SPI_NOT_INITIALIZED;
-	return E_OK;   
-
-        }
+	return E_OK; 
 }
 
 
@@ -298,7 +298,7 @@ void Spi_GetVersionInfo(Std_VersionInfoType *versioninfo)
 * Return value: Spi_StatusType
 * Description: Service returns the SPI Handler/Driver software module status.
 ************************************************************************************/
-/*#if(SPI_HW_STATUS_API == STD_ON)
+#if(SPI_HW_STATUS_API == STD_ON)
 Spi_StatusType* Spi_GetStatus(void)
 {
   #if (SPI_DEV_ERROR_DETECT == STD_ON)
@@ -310,23 +310,11 @@ Spi_StatusType* Spi_GetStatus(void)
 		     SPI_E_UNINIT_ID);
         }
 	else
-#endif 
-{  
-   volatile uint8 Spi_Pin_Index_Iterator =0;
-   volatile Spi_StatusType Spis_Status[SPI_PINS_CONFIGURED_NUMBER];
-   while( Spi_Pin_Index_Iterator != SPI_PINS_CONFIGURED_NUMBER )
-   {
-   
-      Spis_Status[Spi_Pin_Index_Iterator]=Spi_ChannelPtr->Spi_Status;
-     
-     ++Spi_Pin_Index_Iterator;
-     ++Spi_ChannelPtr;
-   }
-  return &Spis_Status;
-}
+ #endif 
+     return Spi_Status;
 }
 #endif
-*/
+
 
 
 
@@ -363,14 +351,14 @@ Std_ReturnType Spi_WriteIB( Spi_ChannelType Channel,const Spi_DataBufferType* Da
 	volatile uint8 error = 1 ;
 	for( Spi_Pin_Index_Iterator = 0 ; Spi_Pin_Index_Iterator < SPI_MAX_CHANNEL ; Spi_Pin_Index_Iterator++)
 	{
-	  	if( Spi_ChannelPtr[Spi_Pin_Index_Iterator] == Channel)
+	  	if( Spi_ChannelPtr[Spi_Pin_Index_Iterator].SpiChannelID == Channel)
 		{
 		  error = 0 ;
 		}
                
         }
 
-	if(error = 1)
+	if(error == 1)
 	{
 	   Det_ReportError(SPI_MODULE_ID, SPI_INSTANCE_ID, Spi_WriteIB_SID,
 		      SPI_E_PARAM_CHANNEL_ID);
@@ -379,7 +367,7 @@ Std_ReturnType Spi_WriteIB( Spi_ChannelType Channel,const Spi_DataBufferType* Da
 #endif /* (SPI_DEV_ERROR_DETECT == STD_ON) */
 	{  
 	 	 	
-	  if(Spi_ChannelPtr[channel].Spi_Status == SPI_IDLE)
+	  if( Spi_Status[Channel] == SPI_IDLE)
 	  {
 	     volatile uint32 * SPIn_BaseAddress_Ptr = NULL_PTR;	   
 	     switch( Channel )
@@ -397,15 +385,15 @@ Std_ReturnType Spi_WriteIB( Spi_ChannelType Channel,const Spi_DataBufferType* Da
 	      /*Write Data*/  
 	       *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSIDATA_OFFSET) = *DataBufferPtr;
 	      /*Busy wait as soon as Transmit FIFO is full */
-	       while( ((*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSISR_OFFSET)) & (1<<1)) == 0  )
-	       {Spi_ChannelPtr[channel].Spi_Status == SPI_BUSY;}
-	       
+               Spi_Status[Channel] = SPI_BUSY;
+	       while( ((*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSISR_OFFSET)) & (1<<1)) == 0  );	         
 	       /* FIFO is empty (No data to be transmitted ) */
-               Spi_ChannelPtr[channel].Spi_Status == SPI_IDLE;
+               Spi_Status[Channel] = SPI_IDLE;
 	       
-           return E_OK;   
+            
 	  }
 	}
+          return E_OK;
 }
 
 
@@ -456,7 +444,7 @@ Std_ReturnType Spi_ReadIB(Spi_ChannelType Channel,Spi_DataBufferType* DataBuffer
 #endif /* (SPI_DEV_ERROR_DETECT == STD_ON) */
         {
             volatile uint32 * SPIn_BaseAddress_Ptr = NULL_PTR;
-  	if(Spi_ChannelPtr[channel].Spi_Status == SPI_IDLE)
+  	if(Spi_Status[Channel] == SPI_IDLE)
 	  {
             switch( Channel )
                  {
@@ -471,13 +459,13 @@ Std_ReturnType Spi_ReadIB(Spi_ChannelType Channel,Spi_DataBufferType* DataBuffer
                  }
            
             /*Busy wait as soon as Receive FIFO is empty*/
+            Spi_Status[Channel] == SPI_BUSY;
             while( ((*(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSISR_OFFSET)) & (1<<2)) == 0 )
 	    {
-	      Spi_ChannelPtr[channel].Spi_Status == SPI_BUSY;
 	    }
            /*Read Data*/  
            *DataBufferPtr = *(volatile uint32 *)((volatile uint8 *)SPIn_BaseAddress_Ptr + SSIDATA_OFFSET);
-            Spi_ChannelPtr[channel].Spi_Status == SPI_IDLE;
+            Spi_Status[Channel] == SPI_IDLE;
            return E_OK;  
 	 }
         }
