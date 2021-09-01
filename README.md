@@ -1,4 +1,4 @@
-                                                        SPI DRIVER AUTOSAR 4.3.1  
+                                                  SPI DRIVER AUTOSAR 4.0.3  
 SPI driver supported functionalities:<br /> 
     1) Initializing SPI driver according to the Post Compile Configuration.<br /> 
     2)Writing & Reading data using SPI Protocol<br />
